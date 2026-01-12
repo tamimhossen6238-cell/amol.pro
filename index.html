@@ -1,1 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreshFruit - Premium Organic Produce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* A little custom style to ensure full width for the image placeholders */
+        .fruit-image-placeholder {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // --- Lucide Icons as SVG Components (Replacement for lucide-react) ---
+
+        const Icon = ({ children, className }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className || "h-6 w-6"}
+            >
+                {children}
+            </svg>
+        );
+
+        const ShoppingCart = (props) => (
+            <Icon {...props}><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></Icon>
+        );
+
+        const Search = (props) => (
+            <Icon {...props}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></Icon>
+        );
+
+        const Star = (props) => (
+            <Icon {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></Icon>
+        );
+
+        const Heart = (props) => (
+            <Icon {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></Icon>
+        );
+
+        const Menu = (props) => (
+            <Icon {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></Icon>
+        );
+
+        const X = (props) => (
+            <Icon {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>
+        );
+
+        const Truck = (props) => (
+            <Icon {...props}><path d="M10 17H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/><path d="M14 17h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-3"/><path d="M5 17a2 2 0 1 0 0 4"/><path d="M17 17a2 2 0 1 0 0 4"/></Icon>
+        );
+
+        const Leaf = (props) => (
+            <Icon {...props}><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 21.5 2.5 23 2c-2.4 2.1-5.1 3.2-7.5 3.5A10.9 10.9 0 0 0 11 20Z"/><path d="M12 15H9c2.8 0 5-2.2 5-5"/></Icon>
+        );
+
+        const Award = (props) => (
+            <Icon {...props}><path d="m15.46 5.86-1.52 1.48c-.68.65-.89 1.76-.57 2.62.58 1.58-.29 2.53-2.3 2.92-2.13.4-3.52 1.34-4.22 2.9-.62 1.37.5 2.15 1.7 2.53 1.5.47 3.32-.4 4.54-1.93 1.63 1.33 3.3 2.15 5.3 2.15 1.56 0 2.65-1.2 2.65-2.65 0-1.78-1.53-2.85-4-3.5C14.7 9.85 13.7 8.5 14.5 7.15c.8-.8 2.22-.64 3.02 0l1.45 1.45"/></Icon>
+        );
+
+        // --- Main App Component ---
+
+        const App = () => {
+            const [cartItems, setCartItems] = useState(0);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeCategory, setActiveCategory] = useState('All');
+
+            // Mock fruit data
+            const fruits = [
+                {
+                    id: 1,
+                    name: "Organic Strawberries",
+                    price: 4.99,
+                    originalPrice: 6.99,
+                    image: "https://placehold.co/300x300/ff6b8b/ffffff?text=🍓",
+                    rating: 4.8,
+                    reviews: 124,
+                    category: "berries",
+                    description: "Sweet and juicy organic strawberries"
+                },
+                {
+                    id: 2,
+                    name: "Premium Avocados",
+                    price: 3.49,
+                    originalPrice: 4.29,
+                    image: "https://placehold.co/300x300/4ade80/ffffff?text=🥑",
+                    rating: 4.6,
+                    reviews: 89,
+                    category: "tropical",
+                    description: "Ripe and creamy premium avocados"
+                },
+                {
+                    id: 3,
+                    name: "Golden Pineapples",
+                    price: 2.99,
+                    originalPrice: 3.99,
+                    image: "https://placehold.co/300x300/fbbf24/ffffff?text=🍍",
+                    rating: 4.7,
+                    reviews: 156,
+                    category: "tropical",
+                    description: "Sweet and tangy golden pineapples"
+                },
+                {
+                    id: 4,
+                    name: "Fresh Blueberries",
+                    price: 5.49,
+                    originalPrice: 6.49,
+                    image: "https://placehold.co/300x300/6366f1/ffffff?text=🫐",
+                    rating: 4.9,
+                    reviews: 203,
+                    category: "berries",
+                    description: "Antioxidant-rich fresh blueberries"
+                },
+                {
+                    id: 5,
+                    name: "Red Apples",
+                    price: 1.99,
+                    originalPrice: 2.49,
+                    image: "https://placehold.co/300x300/ef4444/ffffff?text=🍎",
+                    rating: 4.5,
+                    reviews: 178,
+                    category: "apples",
+                    description: "Crisp and sweet red apples"
+                },
+                {
+                    id: 6,
+                    name: "Green Grapes",
+                    price: 3.99,
+                    originalPrice: 4.99,
+                    image: "https://placehold.co/300x300/10b981/ffffff?text=🍇",
+                    rating: 4.4,
+                    reviews: 92,
+                    category: "grapes",
+                    description: "Seedless green grapes, perfect for snacking"
+                }
+            ];
+
+            const categories = ["All", "Berries", "Tropical", "Apples", "Grapes", "Citrus"];
+
+            const filteredFruits = fruits.filter(fruit => {
+                const matchesSearch = fruit.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    fruit.description.toLowerCase().includes(searchQuery.toLowerCase());
+                
+                const matchesCategory = activeCategory === 'All' || 
+                                        fruit.category.toLowerCase() === activeCategory.toLowerCase();
+
+                return matchesSearch && matchesCategory;
+            });
+
+            const addToCart = () => {
+                setCartItems(prev => prev + 1);
+            };
+
+            const StarRating = ({ rating, reviews }) => (
+                <div className="flex items-center">
+                    <div className="flex text-yellow-400">
+                        {[...Array(5)].map((_, i) => (
+                            <Star 
+                                key={i} 
+                                className={`h-4 w-4 ${i < Math.floor(rating) ? 'fill-current' : ''} ${i < rating ? 'text-yellow-400' : 'text-gray-300'}`} 
+                            />
+                        ))}
+                    </div>
+                    <span className="ml-2 text-sm text-gray-600">({reviews})</span>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gradient-to-b from-green-50 to-emerald-50">
+                    {/* Header */}
+                    <header className="bg-white shadow-lg sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-16">
+                                {/* Logo */}
+                                <div className="flex items-center">
+                                    <Leaf className="h-8 w-8 text-green-600" />
+                                    <span className="ml-2 text-2xl font-bold text-green-800">FreshFruit</span>
+                                </div>
+
+                                {/* Desktop Navigation */}
+                                <nav className="hidden md:flex space-x-8">
+                                    <a href="#" className="text-green-800 hover:text-green-600 font-medium transition-colors">Home</a>
+                                    <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">Shop</a>
+                                    <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">About</a>
+                                    <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">Contact</a>
+                                </nav>
+
+                                {/* Search and Cart */}
+                                <div className="flex items-center space-x-4">
+                                    <div className="relative hidden md:block">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search fruits..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent w-64"
+                                        />
+                                    </div>
+                                    
+                                    <button aria-label="Wishlist" className="relative p-2 text-gray-600 hover:text-red-500 transition-colors">
+                                        <Heart className="h-6 w-6" />
+                                    </button>
+                                    
+                                    <button aria-label="Shopping Cart" className="relative p-2 text-gray-600 hover:text-green-600 transition-colors">
+                                        <ShoppingCart className="h-6 w-6" />
+                                        {cartItems > 0 && (
+                                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
+                                                {cartItems}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Mobile menu button */}
+                                    <button 
+                                        aria-label="Toggle Menu"
+                                        className="md:hidden p-2 text-gray-600 hover:text-green-600 transition-colors"
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    >
+                                        {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Mobile Search */}
+                            <div className="md:hidden mt-4 pb-4 border-t pt-4 border-gray-100">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search fruits..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Mobile Menu */}
+                            {isMenuOpen && (
+                                <div className="md:hidden py-4 border-t border-gray-100">
+                                    <nav className="flex flex-col space-y-4">
+                                        <a href="#" className="text-green-800 font-medium hover:text-green-600 transition-colors">Home</a>
+                                        <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">Shop</a>
+                                        <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">About</a>
+                                        <a href="#" className="text-gray-600 hover:text-green-600 transition-colors">Contact</a>
+                                    </nav>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+                    {/* Hero Section */}
+                    <section className="bg-gradient-to-r from-green-600 to-emerald-700 text-white py-20 md:py-32">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">Fresh Fruits Delivered Daily</h1>
+                            <p className="text-lg md:text-xl mb-10 opacity-95 max-w-3xl mx-auto">Premium quality, organic fruits sourced directly from local farms. Taste the difference!</p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button className="bg-white text-green-700 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+                                    Shop Now
+                                </button>
+                                <button className="border-2 border-white text-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-green-700 transition-all transform hover:scale-105">
+                                    Learn More
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Features Section */}
+                    <section className="py-16 bg-white shadow-inner">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+                                <div className="flex flex-col items-center p-4">
+                                    <Truck className="h-12 w-12 text-green-600 mb-4 animate-bounce-slow" />
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">Fast Delivery</h3>
+                                    <p className="text-gray-600">Next-day delivery guaranteed in all major areas.</p>
+                                </div>
+                                <div className="flex flex-col items-center p-4">
+                                    <Leaf className="h-12 w-12 text-green-600 mb-4" />
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">Organic Quality</h3>
+                                    <p className="text-gray-600">Certified organic produce from trusted local farms.</p>
+                                </div>
+                                <div className="flex flex-col items-center p-4">
+                                    <Award className="h-12 w-12 text-green-600 mb-4 animate-spin-slow" />
+                                    <h3 className="text-xl font-bold mb-2 text-gray-900">Best Quality</h3>
+                                    <p className="text-gray-600">Handpicked at peak ripeness for maximum flavor.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Category Filter */}
+                    <section className="py-8 bg-green-50 border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Explore Our Categories</h2>
+                            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                                {categories.map((category) => (
+                                    <button
+                                        key={category}
+                                        onClick={() => setActiveCategory(category)}
+                                        className={`px-6 py-2 rounded-full font-semibold transition-all shadow-md ${
+                                            activeCategory === category
+                                                ? 'bg-green-600 text-white ring-2 ring-green-300 shadow-green-400/50'
+                                                : 'bg-white text-green-700 hover:bg-green-100 border border-green-200'
+                                        }`}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Products Grid */}
+                    <section className="py-12 md:py-16">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 className="text-3xl font-bold text-gray-800 mb-8">Featured Products</h2>
+                            {filteredFruits.length === 0 ? (
+                                <p className="text-center text-xl text-gray-500 py-10">No fruits found matching your criteria. Try a different search or category!</p>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                                    {filteredFruits.map((fruit) => (
+                                        <div key={fruit.id} className="bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition-transform duration-300 border border-gray-100">
+                                            <div className="relative">
+                                                <img 
+                                                    src={fruit.image} 
+                                                    alt={fruit.name}
+                                                    className="w-full h-64 object-cover fruit-image-placeholder"
+                                                />
+                                                <button aria-label="Add to Wishlist" className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-red-50 transition-colors">
+                                                    <Heart className="h-5 w-5 text-gray-600 hover:text-red-500" />
+                                                </button>
+                                                {fruit.originalPrice > fruit.price && (
+                                                    <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-md">
+                                                        {Math.round(((fruit.originalPrice - fruit.price) / fruit.originalPrice) * 100)}% OFF
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">{fruit.name}</h3>
+                                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">{fruit.description}</p>
+                                                
+                                                <div className="flex items-center mb-4">
+                                                    <StarRating rating={fruit.rating} reviews={fruit.reviews} />
+                                                </div>
+                                                
+                                                <div className="flex items-center justify-between mt-4">
+                                                    <div className="flex items-baseline">
+                                                        <span className="text-3xl font-extrabold text-green-700">${fruit.price.toFixed(2)}</span>
+                                                        {fruit.originalPrice > fruit.price && (
+                                                            <span className="ml-2 text-base text-gray-400 line-through">${fruit.originalPrice.toFixed(2)}</span>
+                                                        )}
+                                                    </div>
+                                                    <button 
+                                                        onClick={addToCart}
+                                                        className="bg-green-600 text-white px-4 py-2 rounded-full shadow-md hover:bg-green-700 transition-colors font-semibold text-sm transform hover:scale-105"
+                                                    >
+                                                        <ShoppingCart className="h-4 w-4 inline-block mr-1" /> Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Newsletter */}
+                    <section className="py-16 bg-gradient-to-r from-green-700 to-emerald-800 text-white">
+                        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Get Fresh Fruit Updates</h2>
+                            <p className="text-lg mb-8 opacity-90">Subscribe to our newsletter for exclusive offers, fresh fruit tips, and new product alerts.</p>
+                            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto shadow-xl">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    className="flex-1 px-5 py-3 rounded-full text-gray-800 focus:outline-none focus:ring-4 focus:ring-green-300/50"
+                                />
+                                <button className="bg-white text-green-700 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-colors transform hover:scale-105">
+                                    Subscribe
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="bg-gray-900 text-white py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 border-b border-gray-800 pb-8">
+                                <div className="col-span-2 md:col-span-2">
+                                    <div className="flex items-center mb-4">
+                                        <Leaf className="h-8 w-8 text-green-400" />
+                                        <span className="ml-2 text-2xl font-bold">FreshFruit</span>
+                                    </div>
+                                    <p className="text-gray-400">Premium quality fruits delivered fresh to your doorstep. Health and taste guaranteed.</p>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-bold mb-4 text-green-400">Shop</h3>
+                                    <ul className="space-y-3 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition-colors">All Fruits</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Seasonal Picks</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Organic Collection</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Gift Boxes</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-bold mb-4 text-green-400">Company</h3>
+                                    <ul className="space-y-3 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Our Farms</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Sustainability</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h3 className="text-lg font-bold mb-4 text-green-400">Support</h3>
+                                    <ul className="space-y-3 text-gray-400">
+                                        <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Shipping Policy</a></li>
+                                        <li><a href="#" className="hover:text-white transition-colors">Returns</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div className="mt-8 pt-6 text-center text-gray-500 text-sm">
+                                <p>&copy; 2026 FreshFruit. All rights reserved. Built with React & Tailwind CSS.</p>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Render the component
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>
 
